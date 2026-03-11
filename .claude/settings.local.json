@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//home/julianvdw/.nvm/versions/**)",
+      "Read(//usr/local/bin/**)",
+      "Read(//opt/homebrew/**)",
+      "Bash(fish -c \"which node; which npm; which bun\")",
+      "Read(//usr/bin/**)",
+      "Bash(/usr/bin/npm install:*)",
+      "Bash(/usr/bin/npm run:*)"
+    ]
+  },
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true
+  }
+}

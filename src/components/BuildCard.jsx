@@ -1,5 +1,16 @@
 import { useNavigate } from 'react-router-dom'
 
+const DIFFICULTY_LABELS = {
+  anfaenger: 'Anfänger',
+  fortgeschritten: 'Fortgeschritten',
+  experte: 'Experte',
+}
+const DIFFICULTY_CLASS = {
+  anfaenger: 'diff-green',
+  fortgeschritten: 'diff-yellow',
+  experte: 'diff-red',
+}
+
 function ThumbPlaceholder() {
   const pattern = [1,0,1,0,1,0,1,0,1,0,1,0]
   return (
@@ -47,7 +58,19 @@ export default function BuildCard({ build }) {
         )}
         <div className="card-meta">
           {date}
+          {build.difficulty && (
+            <span className={`diff-badge ${DIFFICULTY_CLASS[build.difficulty]}`}>
+              {DIFFICULTY_LABELS[build.difficulty]}
+            </span>
+          )}
         </div>
+        {build.tags?.length > 0 && (
+          <div className="card-tags">
+            {build.tags.map(tag => (
+              <span key={tag} className="card-tag">{tag}</span>
+            ))}
+          </div>
+        )}
       </div>
     </article>
   )

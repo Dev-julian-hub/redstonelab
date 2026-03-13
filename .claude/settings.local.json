@@ -7,7 +7,8 @@
       "Bash(fish -c \"which node; which npm; which bun\")",
       "Read(//usr/bin/**)",
       "Bash(/usr/bin/npm install:*)",
-      "Bash(/usr/bin/npm run:*)"
+      "Bash(/usr/bin/npm run:*)",
+      "Bash(npm run:*)"
     ]
   },
   "enabledPlugins": {

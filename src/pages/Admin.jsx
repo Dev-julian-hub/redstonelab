@@ -23,10 +23,14 @@ function ext(file) {
   return file.name.split('.').pop().toLowerCase()
 }
 
+const ALL_TAGS = ['Tür', 'Farm', 'Rechner', 'Logik', 'Falle', 'Anzeige', 'Sonstiges']
+
 // ── Add Build Form ───────────────────────────────────────
 function AddBuildForm({ onBuildAdded }) {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
+  const [difficulty, setDifficulty] = useState('')
+  const [tags, setTags] = useState([])
   const [thumbnail, setThumbnail] = useState(null)      // { file, preview }
   const [stepImages, setStepImages] = useState([])       // [{ id, file, preview, name }]
   const [loading, setLoading] = useState(false)
@@ -34,6 +38,10 @@ function AddBuildForm({ onBuildAdded }) {
   const [success, setSuccess] = useState(false)
   const thumbInputRef = useRef(null)
   const stepsInputRef = useRef(null)
+
+  function toggleTag(tag) {
+    setTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag])
+  }
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -77,6 +85,8 @@ function AddBuildForm({ onBuildAdded }) {
   function reset() {
     setName('')
     setDescription('')
+    setDifficulty('')
+    setTags([])
     setThumbnail(null)
     setStepImages([])
     setError(null)
@@ -114,6 +124,8 @@ function AddBuildForm({ onBuildAdded }) {
         description: description.trim() || null,
         thumbnail_url: thumbnailUrl,
         thumbnail_path: thumbnailPath,
+        difficulty: difficulty || null,
+        tags: tags,
       })
       if (insertErr) throw new Error(`Build speichern: ${insertErr.message}`)
 
@@ -183,6 +195,39 @@ function AddBuildForm({ onBuildAdded }) {
             onChange={e => setDescription(e.target.value)}
             rows={4}
           />
+        </div>
+
+        {/* Difficulty */}
+        <div className="form-group">
+          <label htmlFor="build-difficulty">Schwierigkeitsgrad</label>
+          <select
+            id="build-difficulty"
+            className="input"
+            value={difficulty}
+            onChange={e => setDifficulty(e.target.value)}
+          >
+            <option value="">— kein Wert —</option>
+            <option value="anfaenger">Anfänger</option>
+            <option value="fortgeschritten">Fortgeschritten</option>
+            <option value="experte">Experte</option>
+          </select>
+        </div>
+
+        {/* Tags */}
+        <div className="form-group">
+          <label>Tags</label>
+          <div className="tag-picker">
+            {ALL_TAGS.map(tag => (
+              <button
+                key={tag}
+                type="button"
+                className={`tag-chip${tags.includes(tag) ? ' tag-chip-active' : ''}`}
+                onClick={() => toggleTag(tag)}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Thumbnail */}

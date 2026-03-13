@@ -15,11 +15,20 @@ function SkeletonCard() {
   )
 }
 
+const DIFFICULTY_LABELS = {
+  anfaenger: 'Anfänger',
+  fortgeschritten: 'Fortgeschritten',
+  experte: 'Experte',
+}
+
 export default function Home() {
   const [builds, setBuilds] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [query, setQuery] = useState('')
+  const [activeTag, setActiveTag] = useState(null)
+  const [activeDiff, setActiveDiff] = useState(null)
+  const [sortOrder, setSortOrder] = useState('newest')
 
   useEffect(() => {
     async function fetchBuilds() {
@@ -38,12 +47,27 @@ export default function Home() {
     fetchBuilds()
   }, [])
 
-  const filtered = query.trim()
-    ? builds.filter(b =>
-        b.name?.toLowerCase().includes(query.toLowerCase()) ||
-        b.description?.toLowerCase().includes(query.toLowerCase())
-      )
-    : builds
+  // Collect all tags that exist in the data
+  const allTags = [...new Set(builds.flatMap(b => b.tags || []))]
+
+  let filtered = builds
+  if (query.trim()) {
+    const q = query.toLowerCase()
+    filtered = filtered.filter(b =>
+      b.name?.toLowerCase().includes(q) ||
+      b.description?.toLowerCase().includes(q)
+    )
+  }
+  if (activeTag) filtered = filtered.filter(b => b.tags?.includes(activeTag))
+  if (activeDiff) filtered = filtered.filter(b => b.difficulty === activeDiff)
+
+  if (sortOrder === 'oldest') {
+    filtered = [...filtered].sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+  } else if (sortOrder === 'az') {
+    filtered = [...filtered].sort((a, b) => a.name.localeCompare(b.name, 'de'))
+  }
+
+  const hasFilters = query.trim() || activeTag || activeDiff
 
   return (
     <div className="page">
@@ -65,27 +89,81 @@ export default function Home() {
           <span>— Alle Builds</span>
         </div>
 
-        {/* Search */}
+        {/* Search + Sort */}
         {!loading && builds.length > 0 && (
-          <div className="search-bar">
-            <svg className="search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8">
-              <circle cx="8.5" cy="8.5" r="5.5" />
-              <line x1="13" y1="13" x2="18" y2="18" />
-            </svg>
-            <input
-              className="search-input"
-              type="text"
-              placeholder="Build suchen…"
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              autoComplete="off"
-            />
-            {query && (
-              <button className="search-clear" onClick={() => setQuery('')} aria-label="Suche leeren">
-                ×
-              </button>
+          <>
+            <div className="search-row">
+              <div className="search-bar">
+                <svg className="search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <circle cx="8.5" cy="8.5" r="5.5" />
+                  <line x1="13" y1="13" x2="18" y2="18" />
+                </svg>
+                <input
+                  className="search-input"
+                  type="text"
+                  placeholder="Build suchen…"
+                  value={query}
+                  onChange={e => setQuery(e.target.value)}
+                  autoComplete="off"
+                />
+                {query && (
+                  <button className="search-clear" onClick={() => setQuery('')} aria-label="Suche leeren">
+                    ×
+                  </button>
+                )}
+              </div>
+              <select
+                className="sort-select"
+                value={sortOrder}
+                onChange={e => setSortOrder(e.target.value)}
+                aria-label="Sortierung"
+              >
+                <option value="newest">Neueste</option>
+                <option value="oldest">Älteste</option>
+                <option value="az">Name A–Z</option>
+              </select>
+            </div>
+
+            {/* Tag filter chips */}
+            {allTags.length > 0 && (
+              <div className="filter-row">
+                <button
+                  className={`filter-chip${!activeTag ? ' filter-chip-active' : ''}`}
+                  onClick={() => setActiveTag(null)}
+                >
+                  Alle
+                </button>
+                {allTags.map(tag => (
+                  <button
+                    key={tag}
+                    className={`filter-chip${activeTag === tag ? ' filter-chip-active' : ''}`}
+                    onClick={() => setActiveTag(activeTag === tag ? null : tag)}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
             )}
-          </div>
+
+            {/* Difficulty filter chips */}
+            <div className="filter-row">
+              <button
+                className={`filter-chip${!activeDiff ? ' filter-chip-active' : ''}`}
+                onClick={() => setActiveDiff(null)}
+              >
+                Alle Level
+              </button>
+              {Object.entries(DIFFICULTY_LABELS).map(([key, label]) => (
+                <button
+                  key={key}
+                  className={`filter-chip filter-chip-diff-${key}${activeDiff === key ? ' filter-chip-active' : ''}`}
+                  onClick={() => setActiveDiff(activeDiff === key ? null : key)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </>
         )}
 
         {/* Grid */}
@@ -111,12 +189,12 @@ export default function Home() {
           <div className="no-builds">
             <div style={{ fontSize: 40, marginBottom: 16, opacity: 0.3 }}>⬛</div>
             <h2>Keine Treffer</h2>
-            <p>Kein Build passt zu „{query}".</p>
+            <p>Kein Build passt zu den gewählten Filtern.</p>
           </div>
         ) : (
           <>
             <p className="build-count">
-              {query
+              {hasFilters
                 ? <><strong>{filtered.length}</strong> von {builds.length} Build{builds.length !== 1 ? 's' : ''}</>
                 : <><strong>{builds.length}</strong> Build{builds.length !== 1 ? 's' : ''} gefunden</>
               }

@@ -1124,6 +1124,58 @@ textarea.input {
 }
 .no-builds p { font-size: 13px; color: var(--text-3); }
 
+/* ── Search ─────────────────────────────────────────── */
+.search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.search-icon {
+  position: absolute;
+  left: 13px;
+  width: 15px;
+  height: 15px;
+  color: var(--text-3);
+  pointer-events: none;
+  flex-shrink: 0;
+}
+.search-input {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border-2);
+  color: var(--text);
+  padding: 10px 40px 10px 38px;
+  border-radius: var(--r);
+  font-size: 13px;
+  font-family: var(--font-mono);
+  transition: border-color var(--speed), box-shadow var(--speed);
+  outline: none;
+}
+.search-input:focus {
+  border-color: var(--red);
+  box-shadow: 0 0 0 2px rgba(230,48,48,0.1);
+}
+.search-input::placeholder { color: var(--text-3); }
+.search-clear {
+  position: absolute;
+  right: 10px;
+  color: var(--text-3);
+  font-size: 18px;
+  line-height: 1;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  transition: color var(--speed);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.search-clear:hover { color: var(--red); }
+
 /* ── Footer ─────────────────────────────────────────── */
 .site-footer {
   border-top: 1px solid var(--border);
